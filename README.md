@@ -20,6 +20,8 @@ Elegir **Cargar partido de ejemplo** y luego **Armar equipos**. La demo guarda d
 
 ### Registro, login y mapa
 
+En **Mi jugador** se puede elegir una foto JPG, PNG o WebP de hasta 8 MB. Se recorta al centro, se convierte en un JPEG de 256 px y se guarda junto con la ficha. Al iniciar sesión aparece en un círculo junto a **Mi cuenta**. `supabase/avatars.sql` habilita el guardado compacto con lectura exclusiva de la propia cuenta; eliminar una cuenta elimina su foto por cascada. Verificación de permisos: `tests/avatars.sql` (transacción revertida).
+
 La entrada muestra **Iniciar sesión** y **Crear cuenta** cuando no hay una sesión activa. El registro requiere repetir la contraseña; la confirmación por email vuelve a la app y valida la sesión con Supabase. La sesión se renueva antes de realizar operaciones cuando está por vencer. Los errores aparecen dentro del formulario.
 
 El proyecto usa `https://futbolitoapp.vercel.app` como Site URL en Supabase y permite localhost para desarrollo. La prueba completa de registro necesita que el usuario ingrese su propio email, contraseña y confirme el correo.

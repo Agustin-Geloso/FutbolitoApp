@@ -3,11 +3,12 @@ import { skills, labels, rating, balance } from './balance.js';
 import { mountReminders } from './push.js';
 import { mountAdmin } from './admin.js';
 import { mountProfileChart } from './profile-chart.js';
+import { mountAvatar } from './avatar.js';
 const $=s=>document.querySelector(s), read=(k,f)=>{try{return JSON.parse(localStorage.getItem(k))??f}catch{return f}};
 const config={url:SUPABASE_URL,key:SUPABASE_PUBLIC_KEY};
 let session=read('fb-session',null), state=read('fb-demo',{profile:null,match:null,players:[],teams:null});
 let current=null, players=[], teams=null, profile=null, busy=false, authMode='login', refreshPromise=null;
-let reminders,admin;
+let reminders,admin,avatar;
 const online=()=>Boolean(config.url&&config.key);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function toast(message){$('#toast').textContent=message;$('#toast').hidden=false;clearTimeout(toast.timer);toast.timer=setTimeout(()=>$('#toast').hidden=true,6500)}
@@ -27,6 +28,7 @@ function tab(id){document.querySelectorAll('main>section').forEach(el=>el.hidden
 document.querySelectorAll('[data-tab]').forEach(el=>el.onclick=()=>tab(el.dataset.tab));
 $('#skill-inputs').innerHTML=skills.map((k,i)=>`<label>${labels[i]} · 1 a 10<input name="${k}" type="number" min="1" max="10" value="5" required></label>`).join('');
 const profileChart=mountProfileChart($('#profile-form'));
+avatar=mountAvatar({form:$('#profile-form'),request,getSession:()=>session,notify:toast});
 function fillProfile(){if(!profile)return;const f=$('#profile-form');for(const k of ['name','age','position',...skills])f.elements[k].value=profile[k];f.elements.volunteer.checked=profile.volunteer;profileChart.update()}
 function playerHTML(p,keeper,organizer=false){return `<div class="player"><span class="avatar">${esc(p.name.slice(0,2).toUpperCase())}</span><div class="details"><div class="player-name"><strong>${esc(p.name)}</strong>${organizer?'<span class="organizer-tag">Organizador</span>':''}</div><small>${esc(keeper?'Arquero asignado':p.position)} · ${esc(p.age)} años</small></div><span class="rating" title="Promedio de habilidades de campo">${rating(p).toFixed(1)}</span></div>`}
 function render(){
@@ -34,7 +36,7 @@ function render(){
  reminders?.refresh();
  admin?.sync();
  $('#auth-form').hidden=!online()||!!session;$('#logout').hidden=!session;
- $('#auth-tabs').hidden=!online()||!!session;$('#signed-in').hidden=!session;$('#account-button').textContent=session?'Mi cuenta':'Ingresar / Registrarme';
+ $('#auth-tabs').hidden=!online()||!!session;$('#signed-in').hidden=!session;$('#account-button-label').textContent=session?'Mi cuenta':'Ingresar / Registrarme';
  $('#account-state').textContent=session?`Sesión: ${session.user.email}`:online()?'Ingresá o creá tu cuenta. Si está activada la confirmación de email, confirmalo antes de ingresar.':'Conectá Supabase para habilitar cuentas y partidos compartidos.';
  $('#match-form').hidden=!!current;$('#match-info').innerHTML=current?`<h3>${esc(current.venue)}</h3><p>${esc(new Date(current.starts_at).toLocaleString('es-AR',{dateStyle:'full',timeStyle:'short'}))}</p><p>📍 ${esc(current.address)}</p>${mapHTML(current.address)}<button id="new-match" class="outline">Crear otro partido</button>`:'';
  if($('#new-match'))$('#new-match').onclick=()=>{current=null;players=[];teams=null;history.replaceState(null,'',location.pathname);if(!online()){state.match=null;state.players=[];state.teams=null;save()}render()};
@@ -53,8 +55,8 @@ async function loadMatch(id){
  current=matches[0];players=rows.map(r=>r.profile).filter(Boolean);teams=current.teams;
 }
 async function init(){if(!online()){profile=state.profile;current=state.match;players=state.players;teams=state.teams;fillProfile();render();return}
- if(session){try{const rows=await request(`/rest/v1/profiles?id=eq.${session.user.id}&select=*`);profile=rows[0]??null;fillProfile();const id=new URLSearchParams(location.search).get('partido')||read('fb-last-match',null);if(id)await loadMatch(id)}catch(e){toast(e.message)}}render();}
-$('#profile-form').onsubmit=e=>{e.preventDefault();action(async()=>{const f=e.target;const data={name:f.elements.name.value.trim(),age:Number(f.elements.age.value),position:f.elements.position.value,volunteer:f.elements.volunteer.checked,...Object.fromEntries(skills.map(k=>[k,Number(f.elements[k].value)]))};if(!data.name)throw new Error('Ingresá un nombre.');if(online()){if(!session)throw new Error('Primero ingresá a tu cuenta.');await request('/rest/v1/rpc/save_profile',{method:'POST',body:{data}});profile={...data,id:session.user.id}}else{profile={...data,id:state.profile?.id||crypto.randomUUID()};state.profile=profile;state.players=state.players.map(p=>p.id===profile.id?profile:p);players=state.players;teams=null;state.teams=null;save()}toast('Tu jugador ya está guardado.');tab('match')})};
+ if(session){try{const rows=await request(`/rest/v1/profiles?id=eq.${session.user.id}&select=*`);profile=rows[0]??null;fillProfile();const id=new URLSearchParams(location.search).get('partido')||read('fb-last-match',null);if(id)await loadMatch(id)}catch(e){toast(e.message)}}await avatar?.load().catch(()=>toast('No pudimos cargar tu foto.'));render();}
+$('#profile-form').onsubmit=e=>{e.preventDefault();action(async()=>{const f=e.target;avatar.assertReady();const data={name:f.elements.name.value.trim(),age:Number(f.elements.age.value),position:f.elements.position.value,volunteer:f.elements.volunteer.checked,...Object.fromEntries(skills.map(k=>[k,Number(f.elements[k].value)]))};if(!data.name)throw new Error('Ingresá un nombre.');if(online()){if(!session)throw new Error('Primero ingresá a tu cuenta.');await request('/rest/v1/rpc/save_profile',{method:'POST',body:{data}});profile={...data,id:session.user.id};try{await avatar.save()}catch(error){throw new Error('Tu ficha se guardó, pero no la foto: '+error.message)}}else{profile={...data,id:state.profile?.id||crypto.randomUUID()};state.profile=profile;state.players=state.players.map(p=>p.id===profile.id?profile:p);players=state.players;teams=null;state.teams=null;save()}toast('Tu jugador ya está guardado.');tab('match')})};
 $('#match-form').onsubmit=e=>{e.preventDefault();action(async()=>{const f=e.target,data={venue:f.venue.value.trim(),address:f.address.value.trim(),starts_at:new Date(f.starts.value).toISOString()};if(new Date(data.starts_at)<=new Date())throw new Error('Elegí una fecha y hora futura.');if(online()){if(!session)throw new Error('Ingresá a tu cuenta para crear un partido.');const id=await request('/rest/v1/rpc/create_match',{method:'POST',body:{data}});await loadMatch(id);localStorage.setItem('fb-last-match',JSON.stringify(id));history.replaceState(null,'',`?partido=${id}`)}else{current={...data,id:crypto.randomUUID()};players=[];teams=null;Object.assign(state,{match:current,players,teams});save()}toast('Partido creado. ¡A convocar!')})};
 $('#join').onclick=()=>action(async()=>{if(!profile) {tab('profile');throw new Error('Primero completá tu perfil de jugador.')}if(online()){await request('/rest/v1/rpc/join_match',{method:'POST',body:{target:current.id}});await loadMatch(current.id)}else{players.push({...profile});state.players=players;state.teams=null;teams=null;save()}toast('Ya estás en la lista.')});
 $('#leave').onclick=()=>action(async()=>{if(online()){await request('/rest/v1/rpc/leave_match',{method:'POST',body:{target:current.id}});await loadMatch(current.id)}else{players=players.filter(p=>p.id!==profile.id);Object.assign(state,{players,teams:null});teams=null;save()}toast('Liberaste tu lugar.')});
@@ -67,7 +69,7 @@ document.querySelectorAll('[data-auth]').forEach(b=>b.onclick=()=>setAuthMode(b.
 $('#account-button').onclick=()=>tab('account');$('#edit-profile').onclick=()=>tab('profile');
 $('#show-password').onchange=e=>{for(const name of ['password','confirm'])$('#auth-form').elements[name].type=e.target.checked?'text':'password'};
 $('#auth-form').onsubmit=e=>{e.preventDefault();action(async()=>{const f=e.target;authMessage('');if(authMode==='signup'&&f.password.value!==f.elements.confirm.value){authMessage('Las contraseñas no coinciden.',true);return}try{const redirect=location.origin+location.pathname+location.search;const data=await request(authMode==='signup'?`/auth/v1/signup?redirect_to=${encodeURIComponent(redirect)}`:'/auth/v1/token?grant_type=password',{method:'POST',auth:false,body:{email:f.email.value.trim(),password:f.password.value}});if(data.access_token){storeSession(data);await init();authMessage('Ya iniciaste sesión.');toast('¡Ya estás dentro!');tab(profile?'match':'profile')}else{setAuthMode('login');authMessage('Revisá tu correo para confirmar la cuenta. Si ya tenías una cuenta, podés iniciar sesión.')}f.password.value='';f.elements.confirm.value=''}catch(error){authMessage(error.message,true)}})};
-$('#logout').onclick=()=>action(async()=>{try{await reminders?.detach();await request('/auth/v1/logout',{method:'POST'})}finally{session=null;profile=null;current=null;players=[];teams=null;localStorage.removeItem('fb-session');$('#profile-form').reset();setAuthMode('login');tab('account');toast('Sesión cerrada.')}});
+$('#logout').onclick=()=>action(async()=>{try{await reminders?.detach();await request('/auth/v1/logout',{method:'POST'})}finally{session=null;profile=null;current=null;players=[];teams=null;localStorage.removeItem('fb-session');$('#profile-form').reset();avatar.reset();setAuthMode('login');tab('account');toast('Sesión cerrada.')}});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&online()&&session&&current)action(()=>loadMatch(current.id))});
 const next=new Date(Date.now()+86400000);next.setMinutes(next.getMinutes()-next.getTimezoneOffset());$('#match-form').starts.value=next.toISOString().slice(0,16);
 function mapHTML(address){const q=encodeURIComponent(address);return `<div class="venue-map"><iframe title="Mapa de la cancha: ${esc(address)}" src="https://maps.google.com/maps?q=${q}&z=16&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></div><p class="muted">Ubicación aproximada según la dirección. Comprobá que corresponda a la cancha elegida.</p><div class="actions map-actions"><a class="primary" target="_blank" rel="noopener noreferrer" href="https://www.google.com/maps/search/?api=1&query=${q}">Abrir en Google Maps ↗</a><a class="outline" target="_blank" rel="noopener noreferrer" href="https://www.google.com/maps/dir/?api=1&destination=${q}">Cómo llegar →</a></div>`}
@@ -85,5 +87,6 @@ const invitedMatch=new URLSearchParams(location.search).get('partido');
 if(invitedMatch&&/^[0-9a-f-]{36}$/i.test(invitedMatch))localStorage.setItem('fb-last-match',JSON.stringify(invitedMatch));
 const callback=online()?await readAuthCallback():false;
 await init();
+
 await reminders.refresh();
 if(online()&&!session)tab('account');else if(callback)tab(profile?'match':'profile');
