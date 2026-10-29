@@ -35,6 +35,6 @@ export function mountReminders({request, getSession, notify}) {
  }catch(error){status.textContent=error.message}finally{enable.disabled=!getSession()||!VAPID_PUBLIC_KEY}};
  disable.onclick=async()=>{try{disable.disabled=true;const sub=await subscription();if(sub){await request('/rest/v1/rpc/remove_push_subscription',{method:'POST',body:{target:sub.endpoint}});await sub.unsubscribe()}await refresh();notify('Recordatorios desactivados en este dispositivo.')}catch(error){status.textContent=error.message}finally{disable.disabled=false}};
  // Cerrar la sesión en un equipo compartido deja de enviar avisos a ese equipo.
- async function detach(){if(!VAPID_PUBLIC_KEY||!supported()||!getSession())return;const sub=await subscription();if(sub)await request('/rest/v1/rpc/remove_push_subscription',{method:'POST',body:{target:sub.endpoint}})}
+ async function detach(){const original=getSession();if(!VAPID_PUBLIC_KEY||!supported()||!original)return;const sub=await subscription();if(sub&&getSession()===original)await request('/rest/v1/rpc/remove_push_subscription',{method:'POST',body:{target:sub.endpoint}})}
  return {refresh:()=>refresh().catch(error=>{status.textContent=error.message}),detach};
 }

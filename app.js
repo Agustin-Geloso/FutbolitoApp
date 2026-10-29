@@ -4,19 +4,20 @@ import { mountReminders } from './push.js';
 import { mountAdmin } from './admin.js';
 import { mountProfileChart } from './profile-chart.js';
 import { mountAvatar } from './avatar.js';
+import { settleLogout } from './logout.js';
 const $=s=>document.querySelector(s), read=(k,f)=>{try{return JSON.parse(localStorage.getItem(k))??f}catch{return f}};
 const config={url:SUPABASE_URL,key:SUPABASE_PUBLIC_KEY};
 let session=read('fb-session',null), state=read('fb-demo',{profile:null,match:null,players:[],teams:null});
-let current=null, players=[], teams=null, profile=null, busy=false, authMode='login', refreshPromise=null;
+let current=null, players=[], teams=null, profile=null, busy=false, authMode='login', refreshPromise=null,sessionGeneration=0;
 let reminders,admin,avatar;
 const online=()=>Boolean(config.url&&config.key);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function toast(message){$('#toast').textContent=message;$('#toast').hidden=false;clearTimeout(toast.timer);toast.timer=setTimeout(()=>$('#toast').hidden=true,6500)}
 function save(){localStorage.setItem('fb-demo',JSON.stringify(state))}
-function storeSession(data){session={...data,expires_at:data.expires_at||Math.floor(Date.now()/1000)+Number(data.expires_in||3600)};localStorage.setItem('fb-session',JSON.stringify(session))}
+function storeSession(data,generation=sessionGeneration){if(generation!==sessionGeneration)return;session={...data,expires_at:data.expires_at||Math.floor(Date.now()/1000)+Number(data.expires_in||3600)};localStorage.setItem('fb-session',JSON.stringify(session))}
 async function request(path,{method='GET',body,auth=true}={}){
  if(auth&&session&&session.expires_at*1000<Date.now()+60000){
-  if(!refreshPromise)refreshPromise=request('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:{refresh_token:session.refresh_token},auth:false}).then(storeSession).catch(e=>{session=null;localStorage.removeItem('fb-session');throw e}).finally(()=>refreshPromise=null);
+  if(!refreshPromise){const generation=sessionGeneration;refreshPromise=request('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:{refresh_token:session.refresh_token},auth:false}).then(data=>storeSession(data,generation)).catch(e=>{if(generation===sessionGeneration){session=null;localStorage.removeItem('fb-session')}throw e}).finally(()=>refreshPromise=null)}
   await refreshPromise;
  }
  let res;try{res=await fetch(config.url+path,{method,headers:{apikey:config.key,'Content-Type':'application/json',...(auth&&session?{Authorization:`Bearer ${session.access_token}`}:{})},...(body?{body:JSON.stringify(body)}:{})})}catch{throw new Error('No pudimos conectar. Revisá tu conexión e intentá otra vez.')}
@@ -73,13 +74,14 @@ function openPersonMenu(last=false){if(!session)return;$('#person-menu').hidden=
 $('#avatar-menu-trigger').onclick=()=>$('#person-menu').hidden?openPersonMenu():closePersonMenu(true);
 $('#avatar-menu-trigger').onkeydown=e=>{if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();openPersonMenu(e.key==='ArrowUp')}};
 $('#menu-player').onclick=()=>{closePersonMenu();tab('profile');$('#profile-form').elements.name.focus()};
-$('#menu-logout').onclick=()=>{closePersonMenu();$('#logout').click()};
+$('#menu-logout').onclick=()=>{closePersonMenu();signOut()};
 $('#person-menu').onkeydown=e=>{const items=[$('#menu-player'),$('#menu-logout')];if(e.key==='Escape'){e.preventDefault();closePersonMenu(true)}else if(['ArrowDown','ArrowUp','Home','End'].includes(e.key)){e.preventDefault();const i=items.indexOf(document.activeElement);items[e.key==='Home'?0:e.key==='End'?1:(i+1)%2].focus()}};
 document.addEventListener('pointerdown',e=>{if(!$('#avatar-menu-wrapper').contains(e.target))closePersonMenu()});
-$('#avatar-menu-wrapper').addEventListener('focusout',()=>queueMicrotask(()=>{if(!$('#avatar-menu-wrapper').contains(document.activeElement))closePersonMenu()}));
+$('#avatar-menu-wrapper').addEventListener('focusout',e=>{if(e.relatedTarget&&!$('#avatar-menu-wrapper').contains(e.relatedTarget))closePersonMenu()});
 $('#show-password').onchange=e=>{for(const name of ['password','confirm'])$('#auth-form').elements[name].type=e.target.checked?'text':'password'};
 $('#auth-form').onsubmit=e=>{e.preventDefault();action(async()=>{const f=e.target;authMessage('');if(authMode==='signup'&&f.password.value!==f.elements.confirm.value){authMessage('Las contraseñas no coinciden.',true);return}try{const redirect=location.origin+location.pathname+location.search;const data=await request(authMode==='signup'?`/auth/v1/signup?redirect_to=${encodeURIComponent(redirect)}`:'/auth/v1/token?grant_type=password',{method:'POST',auth:false,body:{email:f.email.value.trim(),password:f.password.value}});if(data.access_token){storeSession(data);await init();authMessage('Ya iniciaste sesión.');toast('¡Ya estás dentro!');tab(profile?'match':'profile')}else{setAuthMode('login');authMessage('Revisá tu correo para confirmar la cuenta. Si ya tenías una cuenta, podés iniciar sesión.')}f.password.value='';f.elements.confirm.value=''}catch(error){authMessage(error.message,true)}})};
-$('#logout').onclick=()=>action(async()=>{try{await reminders?.detach();await request('/auth/v1/logout',{method:'POST'})}finally{session=null;profile=null;current=null;players=[];teams=null;localStorage.removeItem('fb-session');$('#profile-form').reset();avatar.reset();setAuthMode('login');tab('account');toast('Sesión cerrada.')}});
+function signOut(){return action(async()=>{const token=session?.access_token;$('#menu-logout').textContent='Cerrando sesión…';try{await settleLogout({cleanup:()=>reminders?.detach(),revoke:()=>token?fetch(config.url+'/auth/v1/logout',{method:'POST',headers:{apikey:config.key,Authorization:`Bearer ${token}`},signal:AbortSignal.timeout(2000)}):Promise.resolve(),clear:()=>{sessionGeneration++;refreshPromise=null;session=null;profile=null;current=null;players=[];teams=null;localStorage.removeItem('fb-session');localStorage.removeItem('fb-last-match');history.replaceState(null,'',location.pathname);$('#profile-form').reset();avatar.reset();setAuthMode('login');tab('account');closePersonMenu();toast('Sesión cerrada.')}})}finally{$('#menu-logout').textContent='Cerrar sesión'}})}
+$('#logout').onclick=signOut;
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&online()&&session&&current)action(()=>loadMatch(current.id))});
 const next=new Date(Date.now()+86400000);next.setMinutes(next.getMinutes()-next.getTimezoneOffset());$('#match-form').starts.value=next.toISOString().slice(0,16);
 function mapHTML(address){const q=encodeURIComponent(address);return `<div class="venue-map"><iframe title="Mapa de la cancha: ${esc(address)}" src="https://maps.google.com/maps?q=${q}&z=16&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></div><p class="muted">Ubicación aproximada según la dirección. Comprobá que corresponda a la cancha elegida.</p><div class="actions map-actions"><a class="primary" target="_blank" rel="noopener noreferrer" href="https://www.google.com/maps/search/?api=1&query=${q}">Abrir en Google Maps ↗</a><a class="outline" target="_blank" rel="noopener noreferrer" href="https://www.google.com/maps/dir/?api=1&destination=${q}">Cómo llegar →</a></div>`}
