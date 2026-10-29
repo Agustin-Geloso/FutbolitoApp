@@ -3,7 +3,8 @@ import { skills, labels, rating, balance } from './balance.js';
 import { mountReminders } from './push.js';
 import { mountAdmin } from './admin.js';
 const $=s=>document.querySelector(s), read=(k,f)=>{try{return JSON.parse(localStorage.getItem(k))??f}catch{return f}};
-let config=read('fb-config',{url:SUPABASE_URL,key:SUPABASE_PUBLIC_KEY}), session=read('fb-session',null), state=read('fb-demo',{profile:null,match:null,players:[],teams:null});
+const config={url:SUPABASE_URL,key:SUPABASE_PUBLIC_KEY};
+let session=read('fb-session',null), state=read('fb-demo',{profile:null,match:null,players:[],teams:null});
 let current=null, players=[], teams=null, profile=null, busy=false, authMode='login', refreshPromise=null;
 let reminders,admin;
 const online=()=>Boolean(config.url&&config.key);
@@ -30,8 +31,7 @@ function render(){
  document.querySelectorAll('button').forEach(b=>b.disabled=false);
  reminders?.refresh();
  admin?.sync();
- $('#mode').textContent=online()?'● SUPABASE CONECTADO · Partidos compartidos entre dispositivos.':'● DEMO LOCAL · Los datos se guardan solo en este navegador.';
- $('#settings').textContent=online()?'Configuración':'Conectar Supabase';$('#auth-form').hidden=!online()||!!session;$('#logout').hidden=!session;
+ $('#auth-form').hidden=!online()||!!session;$('#logout').hidden=!session;
  $('#auth-tabs').hidden=!online()||!!session;$('#signed-in').hidden=!session;$('#account-button').textContent=session?'Mi cuenta':'Ingresar / Registrarme';
  $('#account-state').textContent=session?`Sesión: ${session.user.email}`:online()?'Ingresá o creá tu cuenta. Si está activada la confirmación de email, confirmalo antes de ingresar.':'Conectá Supabase para habilitar cuentas y partidos compartidos.';
  $('#match-form').hidden=!!current;$('#match-info').innerHTML=current?`<h3>${esc(current.venue)}</h3><p>${esc(new Date(current.starts_at).toLocaleString('es-AR',{dateStyle:'full',timeStyle:'short'}))}</p><p>📍 ${esc(current.address)}</p>${mapHTML(current.address)}<button id="new-match" class="outline">Crear otro partido</button>`:'';
@@ -59,8 +59,6 @@ $('#leave').onclick=()=>action(async()=>{if(online()){await request('/rest/v1/rp
 $('#balance').onclick=()=>action(async()=>{if(online()&&current.owner!==session?.user.id)throw new Error('Solo el organizador puede guardar el reparto.');teams=balance(players);if(online())await request('/rest/v1/rpc/save_teams',{method:'POST',body:{target:current.id,result:teams}});else{state.teams=teams;save()}$('#teams').scrollIntoView({behavior:'smooth'});toast('Equipos armados. Revisá el reparto debajo.');});
 $('#invite').onclick=()=>action(async()=>{if(!online())throw new Error('Esta es una demo local. Conectá Supabase para generar una invitación compartida.');await navigator.clipboard.writeText(`${location.origin}/?partido=${current.id}`);toast('Enlace copiado. Ya lo podés compartir.')});
 $('#demo').onclick=()=>{const positions=['Arquero','Defensa','Mediocampista defensivo','Mediocampista ofensivo','Delantero'];players=['Nico','Agus','Fede','Tomi','Lucho','Santi','Mati','Juani','Fran','Lean'].map((name,i)=>({id:`demo-${i}`,name,age:21+i*2,position:positions[i%5],volunteer:i%5===0,...Object.fromEntries(skills.map((k,j)=>[k,4+(i*3+j*2)%6]))}));current={id:'demo',venue:'El Potrero · Cancha 2',address:'Parque Sarmiento, Buenos Aires, Argentina',starts_at:new Date(Date.now()+86400000*2).toISOString()};teams=null;Object.assign(state,{players,match:current,teams});save();render();toast('Diez jugadores listos. Probá “Armar equipos”.')};
-$('#settings').onclick=()=>{const f=$('#config-form');f.url.value=config.url;f.key.value=config.key;$('#config-dialog').showModal()};$('#close-config').onclick=()=>$('#config-dialog').close();
-$('#config-form').onsubmit=e=>{e.preventDefault();const f=e.target;try{const url=new URL(f.url.value);if(url.protocol!=='https:')throw new Error('La URL debe usar HTTPS.');const key=f.key.value.trim();let payload={};try{payload=JSON.parse(atob(key.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')))}catch{}if(key.startsWith('sb_secret_')||payload.role==='service_role')throw new Error('Esa es una clave secreta. Usá la clave pública.');config={url:url.origin,key};localStorage.setItem('fb-config',JSON.stringify(config));localStorage.removeItem('fb-session');location.reload()}catch(e){toast(e.message)}};
 function authMessage(message,error=false){const el=$('#auth-message');el.textContent=message;el.hidden=!message;el.classList.toggle('error',error)}
 function setAuthMode(mode){authMode=mode;$('#auth-title').textContent=mode==='signup'?'Tu primer paso a la cancha':'Bienvenido a la cancha';$('#confirm-label').hidden=mode!=='signup';const f=$('#auth-form');f.elements.confirm.required=mode==='signup';f.elements.password.minLength=mode==='signup'?8:1;f.elements.password.autocomplete=mode==='signup'?'new-password':'current-password';$('#auth-submit').textContent=mode==='signup'?'Crear mi cuenta →':'Iniciar sesión →';$('#auth-help').textContent=mode==='signup'?'Elegí al menos 8 caracteres. Te enviaremos un correo para confirmar tu cuenta.':'Usá el email y la contraseña con los que te registraste.';document.querySelectorAll('[data-auth]').forEach(b=>{b.classList.toggle('active',b.dataset.auth===mode);b.setAttribute('aria-pressed',String(b.dataset.auth===mode))});authMessage('')}
 document.querySelectorAll('[data-auth]').forEach(b=>b.onclick=()=>setAuthMode(b.dataset.auth));

@@ -12,7 +12,7 @@ Elegir **Cargar partido de ejemplo** y luego **Armar equipos**. La demo guarda d
 
 1. Crear un proyecto Supabase y ejecutar `supabase/schema.sql` en SQL Editor una sola vez.
 2. Copiar Project URL y clave **publishable** o **anon** desde la configuración del proyecto. Nunca usar `service_role` ni `secret`.
-3. Para probar, pulsar **Conectar Supabase** en la web. La configuración se guarda en ese navegador.
+3. Configurar la conexión en `config.js`. La interfaz de jugadores no muestra controles de configuración técnica ni indicadores del proveedor.
 4. Para todos los visitantes, completar las constantes públicas de `config.js` antes de desplegar. Estas claves son públicas por diseño; la protección está en RLS y las funciones SQL.
 5. Crear una cuenta, confirmar el correo si Supabase lo solicita, ingresar y completar Mi jugador. Configurar en Supabase Auth la Site URL de Vercel. Para envíos reales de confirmación a amigos, configurar SMTP propio según las restricciones de correo de Supabase.
 6. Crear un partido y copiar la invitación. Cada persona ingresa con su cuenta, completa su ficha y se suma. El creador también debe sumarse.
@@ -22,7 +22,7 @@ Elegir **Cargar partido de ejemplo** y luego **Armar equipos**. La demo guarda d
 
 La entrada muestra **Iniciar sesión** y **Crear cuenta** cuando no hay una sesión activa. El registro requiere repetir la contraseña; la confirmación por email vuelve a la app y valida la sesión con Supabase. La sesión se renueva antes de realizar operaciones cuando está por vencer. Los errores aparecen dentro del formulario.
 
-El proyecto actual usa `http://localhost:3000` como Site URL en Supabase. Para probar la confirmación por email, abrir esa dirección y mantener el servidor encendido. Antes de usar Vercel, configurar la URL final en Supabase Auth → URL Configuration. La prueba completa de registro necesita que el usuario ingrese su propio email, contraseña y confirme el correo; no se crearon cuentas ficticias.
+El proyecto usa `https://futbolitoapp.vercel.app` como Site URL en Supabase y permite localhost para desarrollo. La prueba completa de registro necesita que el usuario ingrese su propio email, contraseña y confirme el correo.
 
 En el formulario del partido, completar calle, número y ciudad y pulsar **Ver ubicación en el mapa**. Se muestra una vista de Google Maps basada en la dirección, con **Abrir en Google Maps** y **Cómo llegar**. El mapa también aparece en el detalle del partido creado. La dirección puede ser ambigua: comprobar la vista antes de compartir. No incluye búsqueda predictiva ni selección de coordenadas.
 
