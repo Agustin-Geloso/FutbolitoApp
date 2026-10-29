@@ -44,7 +44,7 @@ Subir estos archivos al repositorio `Agustin-Geloso/FutbolitoApp` e importarlo e
 
 ## Recordatorios
 
-La interfaz y el backend de avisos push de 60 y 30 minutos están preparados, pero **los envíos no están activos** hasta desplegar la función, configurar VAPID y programar el cron. Ver `RECORDATORIOS.md` para activación y pruebas en dispositivos reales.
+Los recordatorios de 60 y 30 minutos están configurados en Supabase y publicados en https://futbolitoapp.vercel.app. Cada jugador debe ingresar y activarlos en **Mi cuenta → Recordatorios** en su dispositivo. Ver `RECORDATORIOS.md` para configuración y pruebas de entrega reales.
 
 `node --test tests/balance.test.js`
 

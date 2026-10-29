@@ -4,7 +4,9 @@ Implementación Web Push: permite elegir avisos de 60 y 30 minutos antes en **Mi
 
 ## Estado
 
-El código está preparado. **Los envíos no están activos hasta completar el despliegue, las claves y la tarea programada.** El botón muestra “En preparación” mientras falta la clave pública. No se solicitaron permisos de notificación ni se enviaron avisos durante el desarrollo.
+La web está publicada en https://futbolitoapp.vercel.app. Se aplicó `reminders.sql`, se desplegó `send-reminders`, se guardaron las claves en Edge Function Secrets y Vault y se activó el cron `futbolito-match-reminders` cada minuto. El retorno de Supabase Auth apunta a Vercel, manteniendo localhost como URL de desarrollo permitida.
+
+Cada jugador debe iniciar sesión y activar personalmente los avisos en su dispositivo. No se crearon suscripciones ni se concedieron permisos de notificación en nombre del usuario. La entrega final debe comprobarse desde un dispositivo real.
 
 ## Activación con Vercel y Supabase
 
