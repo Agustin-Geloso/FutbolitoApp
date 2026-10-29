@@ -2,6 +2,7 @@ import { SUPABASE_URL, SUPABASE_PUBLIC_KEY } from './config.js';
 import { skills, labels, rating, balance } from './balance.js';
 import { mountReminders } from './push.js';
 import { mountAdmin } from './admin.js';
+import { mountProfileChart } from './profile-chart.js';
 const $=s=>document.querySelector(s), read=(k,f)=>{try{return JSON.parse(localStorage.getItem(k))??f}catch{return f}};
 const config={url:SUPABASE_URL,key:SUPABASE_PUBLIC_KEY};
 let session=read('fb-session',null), state=read('fb-demo',{profile:null,match:null,players:[],teams:null});
@@ -25,7 +26,8 @@ async function action(fn){if(busy)return;busy=true;document.querySelectorAll('bu
 function tab(id){document.querySelectorAll('main>section').forEach(el=>el.hidden=el.id!==id);document.querySelectorAll('[data-tab]').forEach(el=>el.classList.toggle('active',el.dataset.tab===id));if(id==='account')reminders?.refresh()}
 document.querySelectorAll('[data-tab]').forEach(el=>el.onclick=()=>tab(el.dataset.tab));
 $('#skill-inputs').innerHTML=skills.map((k,i)=>`<label>${labels[i]} · 1 a 10<input name="${k}" type="number" min="1" max="10" value="5" required></label>`).join('');
-function fillProfile(){if(!profile)return;const f=$('#profile-form');for(const k of ['name','age','position',...skills])f.elements[k].value=profile[k];f.elements.volunteer.checked=profile.volunteer}
+const profileChart=mountProfileChart($('#profile-form'));
+function fillProfile(){if(!profile)return;const f=$('#profile-form');for(const k of ['name','age','position',...skills])f.elements[k].value=profile[k];f.elements.volunteer.checked=profile.volunteer;profileChart.update()}
 function playerHTML(p,keeper){return `<div class="player"><span class="avatar">${esc(p.name.slice(0,2).toUpperCase())}</span><div class="details"><strong>${esc(p.name)}</strong><small>${esc(keeper?'Arquero asignado':p.position)} · ${esc(p.age)} años</small></div><span class="rating" title="Promedio de habilidades de campo">${rating(p).toFixed(1)}</span></div>`}
 function render(){
  document.querySelectorAll('button').forEach(b=>b.disabled=false);
