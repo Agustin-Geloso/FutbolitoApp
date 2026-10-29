@@ -1,10 +1,11 @@
 import { SUPABASE_URL, SUPABASE_PUBLIC_KEY } from './config.js';
 import { skills, labels, rating, balance } from './balance.js';
 import { mountReminders } from './push.js';
+import { mountAdmin } from './admin.js';
 const $=s=>document.querySelector(s), read=(k,f)=>{try{return JSON.parse(localStorage.getItem(k))??f}catch{return f}};
 let config=read('fb-config',{url:SUPABASE_URL,key:SUPABASE_PUBLIC_KEY}), session=read('fb-session',null), state=read('fb-demo',{profile:null,match:null,players:[],teams:null});
 let current=null, players=[], teams=null, profile=null, busy=false, authMode='login', refreshPromise=null;
-let reminders;
+let reminders,admin;
 const online=()=>Boolean(config.url&&config.key);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function toast(message){$('#toast').textContent=message;$('#toast').hidden=false;clearTimeout(toast.timer);toast.timer=setTimeout(()=>$('#toast').hidden=true,6500)}
@@ -28,6 +29,7 @@ function playerHTML(p,keeper){return `<div class="player"><span class="avatar">$
 function render(){
  document.querySelectorAll('button').forEach(b=>b.disabled=false);
  reminders?.refresh();
+ admin?.sync();
  $('#mode').textContent=online()?'● SUPABASE CONECTADO · Partidos compartidos entre dispositivos.':'● DEMO LOCAL · Los datos se guardan solo en este navegador.';
  $('#settings').textContent=online()?'Configuración':'Conectar Supabase';$('#auth-form').hidden=!online()||!!session;$('#logout').hidden=!session;
  $('#auth-tabs').hidden=!online()||!!session;$('#signed-in').hidden=!session;$('#account-button').textContent=session?'Mi cuenta':'Ingresar / Registrarme';
@@ -78,6 +80,7 @@ async function readAuthCallback(){const params=new URLSearchParams(location.hash
 if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
 setAuthMode('login');
 reminders=mountReminders({request,getSession:()=>session,notify:toast});
+admin=mountAdmin({request,getSession:()=>session,openTab:tab,notify:toast,onDeleted:(kind,id)=>{if(kind==='match'&&current?.id===id||kind==='user'){current=null;players=[];teams=null;localStorage.removeItem('fb-last-match');history.replaceState(null,'',location.pathname+location.hash);render()}}});
 const invitedMatch=new URLSearchParams(location.search).get('partido');
 if(invitedMatch&&/^[0-9a-f-]{36}$/i.test(invitedMatch))localStorage.setItem('fb-last-match',JSON.stringify(invitedMatch));
 const callback=online()?await readAuthCallback():false;

@@ -40,12 +40,16 @@ Subir estos archivos al repositorio `Agustin-Geloso/FutbolitoApp` e importarlo e
 - PWA básica con manifiesto y caché de interfaz; la disponibilidad de instalación depende del navegador. En iPhone: Safari → Compartir → Agregar a inicio. Los datos online necesitan conexión. No es una aplicación nativa publicada en tiendas.
 - Las fuentes de Google requieren conexión; el resto usa fuentes de respaldo si no están disponibles.
 
-## Verificación
-
 ## Recordatorios
 
 Los recordatorios de 60 y 30 minutos están configurados en Supabase y publicados en https://futbolitoapp.vercel.app. Cada jugador debe ingresar y activarlos en **Mi cuenta → Recordatorios** en su dispositivo. Ver `RECORDATORIOS.md` para configuración y pruebas de entrega reales.
 
-`node --test tests/balance.test.js`
+## Administración
+
+La cuenta autorizada puede abrir **Administración** para buscar y eliminar partidos y usuarios con confirmación escrita. Los permisos se comprueban en Supabase en cada operación. No hay una contraseña administrativa separada. Ver `ADMINISTRACION.md`. La prueba transaccional `tests/admin.sql` pasó en Supabase sin modificar los registros reales.
+
+## Verificación
+
+`node --test tests/*.test.js`
 
 Para verificar Supabase una vez conectado: dos usuarios deben intentar ocupar simultáneamente la última plaza (solo uno debe lograrlo), una cuenta ajena no debe poder guardar equipos y una baja debe invalidar el reparto. Estas verificaciones necesitan un proyecto real.

@@ -1,6 +1,6 @@
 // Caché de la interfaz; nunca almacena peticiones ni respuestas de Supabase.
-const CACHE='futbolito-v3';
-const FILES=['/','/style.css','/app.js','/balance.js','/push.js','/icon.svg','/manifest.webmanifest'];
+const CACHE='futbolito-v4';
+const FILES=['/','/style.css','/app.js','/admin.js','/balance.js','/push.js','/icon.svg','/manifest.webmanifest'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)));self.skipWaiting()});
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',e=>{const u=new URL(e.request.url);if(e.request.method!=='GET'||u.origin!==self.location.origin||u.pathname==='/config.js')return;e.respondWith(fetch(e.request).then(r=>{if(r.ok&&FILES.includes(u.pathname)){const copy=r.clone();caches.open(CACHE).then(c=>c.put(u.pathname,copy))}return r}).catch(()=>caches.match(e.request).then(r=>r||(e.request.mode==='navigate'?caches.match('/'):Response.error()))))});
