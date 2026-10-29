@@ -27,9 +27,19 @@ begin
   raise exception 'Fallo: borrado sin rol';
  exception when insufficient_privilege then null;
  end;
+ begin
+  perform public.admin_delete_user(other_user,'other-test-'||other_user||'@example.invalid');
+  raise exception 'Fallo: borrado de usuario sin rol';
+ exception when insufficient_privilege then null;
+ end;
  perform set_config('request.jwt.claim.sub',a::text,true);
  if not public.is_app_admin() then raise exception 'Fallo: rol admin no detectado'; end if;
  perform public.admin_snapshot();
+ begin
+  perform public.admin_delete_user(u,'incorrecto');
+  raise exception using errcode='XX000',message='Fallo: aceptó email incorrecto';
+ exception when raise_exception then null;
+ end;
  begin
   perform public.admin_delete_match(separate_match,'incorrecto');
   raise exception using errcode='XX000',message='Fallo: aceptó confirmación incorrecta';
