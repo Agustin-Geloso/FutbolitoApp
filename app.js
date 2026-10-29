@@ -28,7 +28,7 @@ document.querySelectorAll('[data-tab]').forEach(el=>el.onclick=()=>tab(el.datase
 $('#skill-inputs').innerHTML=skills.map((k,i)=>`<label>${labels[i]} · 1 a 10<input name="${k}" type="number" min="1" max="10" value="5" required></label>`).join('');
 const profileChart=mountProfileChart($('#profile-form'));
 function fillProfile(){if(!profile)return;const f=$('#profile-form');for(const k of ['name','age','position',...skills])f.elements[k].value=profile[k];f.elements.volunteer.checked=profile.volunteer;profileChart.update()}
-function playerHTML(p,keeper){return `<div class="player"><span class="avatar">${esc(p.name.slice(0,2).toUpperCase())}</span><div class="details"><strong>${esc(p.name)}</strong><small>${esc(keeper?'Arquero asignado':p.position)} · ${esc(p.age)} años</small></div><span class="rating" title="Promedio de habilidades de campo">${rating(p).toFixed(1)}</span></div>`}
+function playerHTML(p,keeper,organizer=false){return `<div class="player"><span class="avatar">${esc(p.name.slice(0,2).toUpperCase())}</span><div class="details"><div class="player-name"><strong>${esc(p.name)}</strong>${organizer?'<span class="organizer-tag">Organizador</span>':''}</div><small>${esc(keeper?'Arquero asignado':p.position)} · ${esc(p.age)} años</small></div><span class="rating" title="Promedio de habilidades de campo">${rating(p).toFixed(1)}</span></div>`}
 function render(){
  document.querySelectorAll('button').forEach(b=>b.disabled=false);
  reminders?.refresh();
@@ -39,7 +39,7 @@ function render(){
  $('#match-form').hidden=!!current;$('#match-info').innerHTML=current?`<h3>${esc(current.venue)}</h3><p>${esc(new Date(current.starts_at).toLocaleString('es-AR',{dateStyle:'full',timeStyle:'short'}))}</p><p>📍 ${esc(current.address)}</p>${mapHTML(current.address)}<button id="new-match" class="outline">Crear otro partido</button>`:'';
  if($('#new-match'))$('#new-match').onclick=()=>{current=null;players=[];teams=null;history.replaceState(null,'',location.pathname);if(!online()){state.match=null;state.players=[];state.teams=null;save()}render()};
  $('#count').textContent=`${players.length} / 10`;
- $('#roster').innerHTML=players.length?players.map(p=>playerHTML(p,false)).join(''):'<p class="empty">La lista está abierta. Creá un partido y sumá a tus amigos.</p>';
+ $('#roster').innerHTML=players.length?players.map(p=>playerHTML(p,false,p.id===current?.owner)).join(''):'<p class="empty">La lista está abierta. Creá un partido y sumá a tus amigos.</p>';
  const me=online()?session?.user.id:profile?.id, joined=players.some(p=>p.id===me);
  $('#join').disabled=!current||joined||players.length>=10;$('#leave').disabled=!joined;$('#invite').disabled=!current;
  $('#balance').disabled=players.length!==10;$('#balance-note').textContent=players.length===10?'Lista completa. Ya podemos repartir.':`Faltan ${10-players.length} jugadores para armar los equipos.`;

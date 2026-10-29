@@ -1,5 +1,5 @@
 // Caché de la interfaz; nunca almacena peticiones ni respuestas de Supabase.
-const CACHE='futbolito-v6';
+const CACHE='futbolito-v7';
 const FILES=['/','/style.css','/app.js','/admin.js','/balance.js','/profile-chart.js','/push.js','/icon.svg','/manifest.webmanifest'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)));self.skipWaiting()});
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
