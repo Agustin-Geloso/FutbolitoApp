@@ -1,10 +1,137 @@
-<!doctype html>
-<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#163e2e"><meta name="description" content="Tu próximo partido, con equipos más parejos."><title>Futbolito · Armá el partido</title><link rel="manifest" href="/manifest.webmanifest"><link rel="icon" href="/icon.svg"><link rel="stylesheet" href="/style.css"></head>
-<body><header><a class="brand" href="/">✳ <span>futbolito<span class="dot">.</span></span></a><span class="edition">EL FÚTBOL NOS ENCUENTRA</span><div class="actions header-actions"><div id="avatar-menu-wrapper" hidden><button id="avatar-menu-trigger" class="avatar-trigger" type="button" aria-label="Abrir menú de usuario" aria-haspopup="menu" aria-expanded="false" aria-controls="person-menu"><img id="account-avatar" alt="" hidden><span class="avatar-fallback" aria-hidden="true">👤</span></button><div id="person-menu" role="menu" aria-label="Opciones de usuario" hidden><button id="menu-player" role="menuitem" type="button">Mi jugador</button><button id="menu-logout" role="menuitem" type="button">Cerrar sesión</button></div></div><button id="account-button" class="primary"><span id="account-button-label">Ingresar / Registrarme</span></button></div></header>
-<main><div class="intro"><div><span class="eyebrow">MENOS ORGANIZAR. MÁS JUGAR.</span><h1>El partido empieza<br>con equipos <em>parejos.</em></h1><p>Juntá a los de siempre. Nosotros nos encargamos del reparto.</p></div><div class="stamp">FÚTBOL<br><strong>5</strong><br>ENTRE AMIGOS</div></div>
-<nav aria-label="Secciones"><button data-tab="match" class="active">01 <span>El partido</span></button><button data-tab="profile">02 <span>Mi jugador</span></button><button data-tab="account">03 <span>Mi cuenta</span></button></nav>
-<section id="match"><div class="layout"><div><article class="card"><div class="card-title"><h2>La próxima fecha</h2><span class="tag">AMISTOSO</span></div><form id="match-form"><div class="fields"><label>Nombre de la cancha<input name="venue" required maxlength="100" placeholder="Ej. El potrero"></label><label>Dirección<input name="address" required maxlength="200" placeholder="Calle, número y ciudad"></label><label>Fecha y hora local<input name="starts" type="datetime-local" required></label></div><button class="primary" type="submit">Crear partido <span>↗</span></button></form><div id="match-info"></div></article><article class="card roster-card"><div class="card-title"><h2>Los convocados</h2><span id="count" class="tag">0 / 10</span></div><div id="roster"></div><div class="actions"><button id="join" class="primary">Sumarme al partido +</button><button id="leave" class="outline">Bajarme</button><button id="invite" class="outline">Copiar invitación ↗</button></div><p class="muted" id="invite-note"></p></article></div><aside><article class="card dark"><span class="eyebrow">QUE GANE EL MEJOR EQUIPO</span><h2>El talento se reparte.<br>Las ganas, se traen.</h2><p>Buscamos el mejor equilibrio entre nivel, físico y posiciones. Un arquero por lado, siempre que haya disponibles.</p><button id="balance" class="lime">Armar equipos <span>→</span></button><p id="balance-note">Necesitamos 10 jugadores para empezar.</p></article><article class="mini"><span>↗</span><div><strong>La cancha, a un toque</strong><p>Abrí la dirección del partido en Google Maps.</p></div></article><button id="demo" class="outline wide">Cargar partido de ejemplo</button></aside></div><div id="teams" aria-live="polite"></div></section>
-<section id="profile" hidden><article class="card narrow"><span class="eyebrow">TU FICHA</span><h2>¿Cómo jugás?</h2><p class="muted">Sé honesto: tus valoraciones ayudan a que el partido sea parejo.</p><form id="profile-form"><div class="fields"><label>Nombre o apodo<input name="name" maxlength="50" required></label><label>Edad<input name="age" type="number" min="16" max="90" value="25" required></label><label>Posición principal<select name="position"><option>Arquero</option><option>Defensa</option><option>Mediocampista defensivo</option><option>Mediocampista ofensivo</option><option>Delantero</option></select></label><div id="skill-inputs"></div><label class="check"><input type="checkbox" name="volunteer"> Puedo atajar si falta un arquero</label></div><button class="primary">Guardar mi jugador →</button></form></article></section>
-<section id="account" hidden><article class="card narrow"><span class="eyebrow">JUGAMOS JUNTOS</span><h2 id="auth-title">Bienvenido a la cancha</h2><p id="account-state" class="muted">Ingresá para organizar tu próximo partido.</p><div id="auth-tabs" class="auth-tabs" role="group" aria-label="Acceso a la cuenta"><button type="button" data-auth="login" aria-pressed="true" class="active">Iniciar sesión</button><button type="button" data-auth="signup" aria-pressed="false">Crear cuenta</button></div><p id="auth-message" class="auth-message" role="status" hidden></p><form id="auth-form"><label>Email<input type="email" name="email" autocomplete="email" placeholder="vos@ejemplo.com" required></label><label>Contraseña<input type="password" name="password" autocomplete="current-password" required></label><label id="confirm-label" hidden>Repetí la contraseña<input type="password" name="confirm" autocomplete="new-password"></label><label class="check"><input type="checkbox" id="show-password"> Mostrar contraseña</label><button id="auth-submit" class="primary wide" type="submit">Iniciar sesión →</button><p id="auth-help" class="muted">Usá el email y la contraseña con los que te registraste.</p></form><div id="signed-in" hidden><p>Tu cuenta está lista. Completá tu ficha para sumarte a un partido.</p><button id="edit-profile" class="primary">Ir a mi jugador →</button></div><button id="logout" class="outline" hidden>Cerrar sesión</button></article></section>
-<footer><span>futbolito. / HECHO PARA COMPARTIR CANCHA</span><span>Primera prueba · Fútbol 5</span></footer></main>
-<div id="toast" role="status" aria-live="polite" hidden></div><script type="module" src="/app.js"></script></body></html>
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Futbolito | Agenda de canchas</title><style>
+*{box-sizing:border-box}body{margin:0;background:#f3f5ef;color:#172820;font:16px system-ui,sans-serif}header{background:#142820;color:white;padding:22px max(5vw,20px);display:flex;justify-content:space-between;align-items:center;gap:12px}header strong{letter-spacing:.12em}small,.muted{color:#52655a}header small{color:#d1dfd2}main{max-width:1100px;margin:auto;padding:24px 18px}.hero{background:linear-gradient(115deg,#183e2b,#275b38);border-radius:24px;color:white;padding:32px;margin-bottom:20px}.hero p{color:#dbeddf}.tag{color:#d8fa91;font-size:12px;font-weight:800;letter-spacing:.14em}h1{font-size:clamp(32px,6vw,55px);margin:8px 0}h2{margin:0 0 12px}button,input,select{font:inherit;border:1px solid #c9d4ca;border-radius:9px;padding:9px;background:white;color:inherit}button{cursor:pointer;font-weight:650}button:hover{border-color:#208349}.primary{background:#d8fa91;border-color:#d8fa91;color:#142820}.toolbar,.actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.toolbar{justify-content:space-between;margin-bottom:12px}.panel{background:white;border:1px solid #dce4d9;border-radius:18px;padding:clamp(10px,3vw,23px)}.grid{display:grid;grid-template-columns:62px repeat(2,minmax(0,1fr));gap:6px;align-items:stretch}.grid>b,.hour{padding:9px 3px}.slot{text-align:left;min-height:48px;overflow-wrap:anywhere;background:#f4f8f3}.slot small{display:block}.regular{background:#e1efde}.school{background:#e0ebfa}.birthday{background:#fce7cc}dialog{width:min(94vw,480px);border:0;border-radius:18px;padding:24px;color:inherit}dialog::backdrop{background:#101e16aa}form label{display:grid;gap:4px;margin-bottom:12px}.error{color:#a12e23}footer{margin:18px 0}.legend{font-size:13px;margin:8px 0 15px}.legend span{padding:4px 7px;border-radius:6px;display:inline-block}
+</style><header><strong>⚽ FUTBOLITO</strong><small>Panel de gestión · Demo</small></header><main><section class="hero"><div class="tag">COMPLEJO DE FÚTBOL 6</div><h1>Agenda de canchas</h1><p>Dos canchas · Todos los días de 09:00 a 23:00</p><button class="primary" id="new">+ Nueva reserva</button></section><section class="panel"><div class="toolbar"><h2>Turnos del día</h2><div class="actions"><button id="prev" aria-label="Día anterior">‹</button><input id="day" type="date" aria-label="Fecha de la agenda"><button id="next" aria-label="Día siguiente">›</button><button id="today">Hoy</button><button id="prices">Tarifas</button></div></div><div id="stats" class="muted" aria-live="polite"></div><div class="legend"><span class="regular">Fútbol</span> <span class="school">Escuela</span> <span class="birthday">Cumpleaños</span> · ↻ Turno fijo</div><div id="grid" class="grid"></div></section><footer class="muted">Valores de muestra en pesos argentinos. Los cambios se guardan en este navegador.</footer></main>
+<dialog id="booking"><form id="reserve"><h2>Nueva reserva</h2><label>Cliente o grupo<input name="client" maxlength="70" required></label><label>Actividad<select name="type"><option value="regular">Fútbol</option><option value="school">Escuela</option><option value="birthday">Cumpleaños</option></select></label><label>Fecha<input name="date" type="date" required></label><label>Cancha<select name="court"><option value="1">Cancha 1</option><option value="2">Cancha 2</option></select></label><label>Hora de inicio<select name="hour"></select></label><label>Duración en horas<input type="number" name="hours" min="1" max="14" value="1" required></label><label>Frecuencia<select name="repeat"><option value="once">Una vez</option><option value="weekly">Fijo semanal</option></select></label><p id="quote"></p><p id="error" class="error" role="alert"></p><div class="actions"><button type="button" data-close>Volver</button><button class="primary">Guardar reserva</button></div></form></dialog>
+<dialog id="detail"><h2 id="detailTitle"></h2><p id="detailText"></p><div class="actions"><button data-close>Volver</button><button id="remove">Cancelar reserva</button></div></dialog>
+<dialog id="rates"><form id="rateForm"><h2>Tarifas por hora</h2><p class="muted">Las nuevas reservas usan estas tarifas. Las existentes conservan su importe.</p><label>Fútbol (ARS)<input name="regular" type="number" min="1" max="100000000" required></label><label>Escuela (ARS)<input name="school" type="number" min="1" max="100000000" required></label><label>Cumpleaños (ARS)<input name="birthday" type="number" min="1" max="100000000" required></label><div class="actions"><button type="button" data-close>Volver</button><button class="primary">Guardar tarifas</button></div></form></dialog>
+<script>
+const $ = id => document.getElementById(id);
+const key = 'futbolito-complejo-demo-v1';
+const labels = {regular:'Fútbol',school:'Escuela',birthday:'Cumpleaños'};
+const money = n => new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0}).format(n);
+const localDay = () => new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Argentina/Buenos_Aires'}).format(new Date());
+const weekday = day => new Date(day+'T12:00:00Z').getUTCDay();
+const move = (day, delta) => {
+  const date = new Date(day+'T12:00:00Z');
+  date.setUTCDate(date.getUTCDate()+delta);
+  return date.toISOString().slice(0,10);
+};
+const time = h => String(h).padStart(2,'0')+':00';
+const hours = Array.from({length:14},(_,i)=>i+9);
+const today = localDay();
+const schoolDay = move(today,(8-weekday(today))%7);
+const initial = {
+  rates:{regular:32000,school:24000,birthday:55000},
+  bookings:[
+    {id:'example-1',client:'Equipo La Banda',type:'regular',date:today,court:1,hour:19,hours:1,repeat:'weekly',price:32000},
+    {id:'example-2',client:'Escuela Horizonte',type:'school',date:schoolDay,court:2,hour:10,hours:2,repeat:'weekly',price:48000},
+    {id:'example-3',client:'Cumple de Mía',type:'birthday',date:today,court:2,hour:16,hours:2,repeat:'once',price:110000}
+  ]
+};
+function read(){
+  try { return JSON.parse(localStorage.getItem(key)) || initial; } catch { return initial; }
+}
+function save(state){ localStorage.setItem(key,JSON.stringify(state)); }
+const weekly = booking => booking.repeat === 'weekly';
+const occurs = (booking, day) => booking.date === day || weekly(booking) && booking.date <= day && weekday(booking.date) === weekday(day);
+const clash = (a,b) => {
+  if(a.court !== b.court || a.hour >= b.hour+b.hours || b.hour >= a.hour+a.hours) return false;
+  if(weekly(a) && weekly(b)) return weekday(a.date) === weekday(b.date);
+  return weekly(a) ? occurs(a,b.date) : occurs(b,a.date);
+};
+const day = $('day');
+const form = $('reserve');
+const fields = form.elements;
+day.value = today;
+for(const hour of hours) fields.hour.add(new Option(time(hour),hour));
+function render(){
+  const bookings = read().bookings.filter(b=>occurs(b,day.value));
+  $('stats').textContent = bookings.length+' reservas · '+(28-bookings.reduce((n,b)=>n+b.hours,0))+' horas de cancha disponibles';
+  const grid = $('grid');
+  grid.replaceChildren();
+  for(const heading of ['Hora','Cancha 1','Cancha 2']){
+    const cell = document.createElement('b');
+    cell.textContent = heading;
+    grid.append(cell);
+  }
+  for(const hour of hours){
+    const cell = document.createElement('span');
+    cell.className = 'hour';
+    cell.textContent = time(hour);
+    grid.append(cell);
+    for(const court of [1,2]){
+      const booked = bookings.find(b=>b.court===court && b.hour<=hour && b.hour+b.hours>hour);
+      const button = document.createElement('button');
+      button.className = 'slot '+(booked?.type || '');
+      button.textContent = booked ? booked.client : '+ Disponible';
+      button.setAttribute('aria-label', 'Cancha '+court+', '+time(hour)+', '+button.textContent);
+      if(booked){
+        const note = document.createElement('small');
+        note.textContent = labels[booked.type]+(weekly(booked)?' · ↻ Fijo':'');
+        button.append(note);
+      }
+      button.onclick = () => booked ? showDetail(booked) : newBooking(court,hour);
+      grid.append(button);
+    }
+  }
+}
+function changeDay(value){ day.value=value; render(); }
+$('prev').onclick=()=>changeDay(move(day.value,-1));
+$('next').onclick=()=>changeDay(move(day.value,1));
+$('today').onclick=()=>changeDay(localDay());
+day.onchange=()=>changeDay(day.value || localDay());
+function quote(){ $('quote').textContent='Importe estimado · '+money(read().rates[fields.type.value]*Number(fields.hours.value)); }
+function newBooking(court=1,hour=9){
+  form.reset();
+  fields.date.value=day.value;
+  fields.court.value=court;
+  fields.hour.value=hour;
+  $('error').textContent='';
+  quote();
+  $('booking').showModal();
+}
+$('new').onclick=()=>newBooking();
+form.oninput=quote;
+form.onsubmit=event=>{
+  event.preventDefault();
+  const state=read();
+  const {client,type,date,court,hour,hours,repeat}=Object.fromEntries(new FormData(form));
+  const b={id:crypto.randomUUID(),client:client.trim(),type,date,court:Number(court),hour:Number(hour),hours:Number(hours),repeat,price:state.rates[type]*Number(hours)};
+  if(!b.client) return $('error').textContent='Ingresá el nombre del cliente o grupo.';
+  if(b.hour+b.hours>23) return $('error').textContent='La reserva debe terminar a las 23:00 o antes.';
+  if(b.type==='school' && [0,6].includes(weekday(b.date))) return $('error').textContent='Las escuelas pueden reservar de lunes a viernes.';
+  if(state.bookings.some(other=>clash(b,other))) return $('error').textContent='La cancha ya tiene una reserva en ese horario.';
+  state.bookings.push(b);
+  save(state);
+  $('booking').close();
+  changeDay(b.date);
+};
+function showDetail(b){
+  $('detailTitle').textContent=b.client;
+  $('detailText').textContent=labels[b.type]+' · Cancha '+b.court+' · '+time(b.hour)+' a '+time(b.hour+b.hours)+' · '+money(b.price)+(weekly(b)?' · Fijo semanal desde '+b.date:'');
+  $('remove').textContent=weekly(b)?'Cancelar serie completa':'Cancelar reserva';
+  $('remove').onclick=()=>{
+    const state=read();
+    state.bookings=state.bookings.filter(other=>other.id!==b.id);
+    save(state);
+    $('detail').close();
+    render();
+  };
+  $('detail').showModal();
+}
+$('prices').onclick=()=>{
+  const rates=read().rates;
+  for(const type of Object.keys(labels)) $('rateForm').elements[type].value=rates[type];
+  $('rates').showModal();
+};
+$('rateForm').onsubmit=event=>{
+  event.preventDefault();
+  const state=read();
+  for(const [type,value] of new FormData(event.currentTarget)) state.rates[type]=Number(value);
+  save(state);
+  $('rates').close();
+};
+document.querySelectorAll('[data-close]').forEach(button=>button.onclick=()=>button.closest('dialog').close());
+window.addEventListener('storage',event=>{if(event.key===key) render();});
+render();
+</script></html>

@@ -1,8 +1,0 @@
-.env
-.env.*
-.git
-supabase
-scripts
-tests
-*.md
-server.js
