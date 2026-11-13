@@ -1,1 +1,1 @@
-{"framework":null,"buildCommand":"mkdir -p dist && cp index.html cancha.jpg dist/","outputDirectory":"dist"}
+{"framework":null,"buildCommand":"mkdir -p dist && cp index.html cancha.jpg logo-ptf.jpeg dist/","outputDirectory":"dist"}
