@@ -1,4 +1,5 @@
 <!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Para Todos Futbol | Agenda de canchas</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=DM+Sans:wght@400;500;600;700;800&display=swap"><link rel="icon" type="image/jpeg" href="./logo-ptf.jpeg"><script>
+if(new URLSearchParams(location.search).get("vista")==="cliente") document.documentElement.classList.add("customer");
 try{
   const saved=localStorage.getItem('ptf-theme');
   document.documentElement.dataset.theme=saved ?? (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
@@ -51,8 +52,15 @@ body{font-family:"DM Sans",system-ui,sans-serif}
 .slot.tournament{border:1px solid transparent;border-left:4px solid #9a75cf}
 .tournament,.slot.tournament{background:#f0e6ff}
 [data-theme="dark"] .legend .tournament,[data-theme="dark"] .slot.tournament{background:#402e56}
-</style><header><div class="brand"><img class="brand-logo" src="./logo-ptf.jpeg" alt="" width="48" height="48"><div><strong>Para Todos Futbol</strong><small>Complejo deportivo</small></div></div><div class="header-actions"><button id="theme" type="button" aria-pressed="false">Modo oscuro</button><span class="demo"><i></i> Modo demo</span></div></header><main><section class="hero"><img class="hero-photo" src="./cancha.jpg" alt="Cancha de fútbol con césped sintético y un arco en primer plano" width="750" height="401" fetchpriority="high"><div class="hero-copy"><div class="tag">GESTIÓN DEL COMPLEJO</div><h1>Agenda de canchas</h1><p>Fútbol 6 · Dos canchas · 09:00 a 23:00</p><button class="primary" id="new">+ Nueva reserva</button></div></section><section class="metrics" aria-label="Resumen del día"><div><span>Reservas</span><strong id="count">0</strong></div><div><span>Horas disponibles</span><strong id="available">28</strong></div><div><span>Turnos fijos</span><strong id="fixed">0</strong></div></section><section class="panel"><div class="toolbar"><div><h2>Turnos del día</h2><p id="selectedDay" class="selected-day"></p></div><div class="actions"><button id="prev" aria-label="Día anterior">‹</button><input id="day" type="date" aria-label="Fecha de la agenda"><button id="next" aria-label="Día siguiente">›</button><button id="today">Hoy</button><button id="prices">Tarifas</button></div></div><div class="legend"><span class="regular">Fútbol</span> <span class="school">Escuela</span> <span class="birthday">Cumpleaños</span> <span class="tournament">Torneo</span> · ↻ Turno fijo</div><div id="grid" class="grid"></div></section><footer class="muted">Valores de muestra en pesos argentinos. Los cambios se guardan en este navegador.</footer></main>
-<dialog id="booking"><form id="reserve"><div class="booking-heading"><div><div class="eyebrow">AGENDA · FÚTBOL 6</div><h2>Nueva reserva</h2><p>Elegí la cancha y un horario disponible.</p></div><button type="button" data-close aria-label="Cerrar">×</button></div><div class="booking-fields"><label class="wide">Cliente o grupo<input name="client" maxlength="70" required></label><label>Actividad<select name="type"><option value="regular">Fútbol</option><option value="school">Escuela</option><option value="birthday">Cumpleaños</option><option value="tournament">Torneo</option></select></label><label>Fecha<input name="date" type="date" required></label><label>Cancha<select name="court"><option value="1">Cancha 1</option><option value="2">Cancha 2</option></select></label><label>Hora de inicio<select name="hour"></select></label><label>Duración en horas<input type="number" name="hours" min="1" max="14" value="1" required></label><label class="wide">Frecuencia<select name="repeat"><option value="once">Una vez</option><option value="weekly">Fijo semanal</option></select></label></div><p id="availability" role="status"></p><p id="quote"></p><p id="error" class="error" role="alert"></p><div class="actions"><button type="button" data-close>Volver</button><button class="primary" id="saveBooking">Guardar reserva</button></div></form></dialog>
+
+.customer-link{color:inherit;font-size:13px;font-weight:700}
+.customer-only{display:none}
+.customer .customer-only{display:block}
+.customer :is(.customer-link,.metrics,.legend,#prices,.booking-fields label:has([name=type]),.booking-fields label:has([name=repeat])){display:none}
+.customer .slot:disabled{cursor:default;background:transparent;color:var(--soft)}
+#confirmation{padding:12px;border-radius:10px;border:1px solid var(--line);font-weight:700}
+</style><header><div class="brand"><img class="brand-logo" src="./logo-ptf.jpeg" alt="" width="48" height="48"><div><strong>Para Todos Futbol</strong><small>Complejo deportivo</small></div></div><div class="header-actions"><a class="customer-link" href="?vista=cliente">Vista de clientes</a><button id="theme" type="button" aria-pressed="false">Modo oscuro</button><span class="demo"><i></i> Modo demo</span></div></header><main><section class="hero"><img class="hero-photo" src="./cancha.jpg" alt="Cancha de fútbol con césped sintético y un arco en primer plano" width="750" height="401" fetchpriority="high"><div class="hero-copy"><div class="tag">GESTIÓN DEL COMPLEJO</div><h1>Agenda de canchas</h1><p>Fútbol 6 · Dos canchas · 09:00 a 23:00</p><button class="primary" id="new">+ Nueva reserva</button></div></section><section class="metrics" aria-label="Resumen del día"><div><span>Reservas</span><strong id="count">0</strong></div><div><span>Horas disponibles</span><strong id="available">28</strong></div><div><span>Turnos fijos</span><strong id="fixed">0</strong></div></section><section class="panel"><p id="confirmation" role="status" hidden></p><div class="toolbar"><div><h2>Turnos del día</h2><p id="selectedDay" class="selected-day"></p></div><div class="actions"><button id="prev" aria-label="Día anterior">‹</button><input id="day" type="date" aria-label="Fecha de la agenda"><button id="next" aria-label="Día siguiente">›</button><button id="today">Hoy</button><button id="prices">Tarifas</button></div></div><div class="legend"><span class="regular">Fútbol</span> <span class="school">Escuela</span> <span class="birthday">Cumpleaños</span> <span class="tournament">Torneo</span> · ↻ Turno fijo</div><div id="grid" class="grid"></div></section><footer class="muted">Valores de muestra en pesos argentinos. Los cambios se guardan en este navegador.</footer></main>
+<dialog id="booking"><form id="reserve"><div class="booking-heading"><div><div class="eyebrow">AGENDA · FÚTBOL 6</div><h2>Nueva reserva</h2><p>Elegí la cancha y un horario disponible.</p></div><button type="button" data-close aria-label="Cerrar">×</button></div><div class="booking-fields"><label class="wide">Cliente o grupo<input name="client" maxlength="70" required></label><label>Actividad<select name="type"><option value="regular">Fútbol</option><option value="school">Escuela</option><option value="birthday">Cumpleaños</option><option value="tournament">Torneo</option></select></label><label>Fecha<input name="date" type="date" required></label><label>Cancha<select name="court"><option value="1">Cancha 1</option><option value="2">Cancha 2</option></select></label><label>Hora de inicio<select name="hour"></select></label><label>Duración en horas<input type="number" name="hours" min="1" max="14" value="1" required></label><label class="wide">Frecuencia<select name="repeat"><option value="once">Una vez</option><option value="weekly">Fijo semanal</option></select></label></div><p id="availability" role="status"></p><p id="quote"></p><p class="customer-only muted">Pago simulado para la demo. No se realiza ningún cobro.</p><p id="error" class="error" role="alert"></p><div class="actions"><button type="button" data-close>Volver</button><button class="primary" id="saveBooking">Guardar reserva</button></div></form></dialog>
 <dialog id="detail"><h2 id="detailTitle"></h2><p id="detailText"></p><div class="actions"><button data-close>Volver</button><button id="remove">Cancelar reserva</button></div></dialog>
 <dialog id="rates"><form id="rateForm"><h2>Tarifas por hora</h2><p class="muted">Las nuevas reservas usan estas tarifas. Las existentes conservan su importe.</p><label>Fútbol (ARS)<input name="regular" type="number" min="1" max="100000000" required></label><label>Escuela (ARS)<input name="school" type="number" min="1" max="100000000" required></label><label>Cumpleaños (ARS)<input name="birthday" type="number" min="1" max="100000000" required></label><label>Torneo (ARS)<input name="tournament" type="number" min="1" max="100000000" required></label><div class="actions"><button type="button" data-close>Volver</button><button class="primary">Guardar tarifas</button></div></form></dialog>
 <script>
@@ -66,6 +74,17 @@ themeButton.onclick = () => {
   themeButton.setAttribute('aria-pressed', String(dark));
   try { localStorage.setItem('ptf-theme', page.dataset.theme); } catch {}
 };
+const customer = document.documentElement.classList.contains('customer');
+const depositPercent = 30;
+const depositFor = total => Math.ceil(total * depositPercent / 100);
+if(customer){
+  document.title = 'Reservá tu cancha | Para Todos Futbol';
+  document.querySelector('.tag').textContent = 'PARA TODOS FUTBOL';
+  document.querySelector('h1').textContent = 'Reservá tu cancha';
+  $('new').textContent = 'Elegir horario';
+  $('saveBooking').textContent = 'Simular pago y reservar';
+  document.querySelector('footer').textContent = 'Demo de reservas. Los datos se guardan en este navegador.';
+}
 const key = 'futbolito-complejo-demo-v1';
 const labels = {regular:'Fútbol',school:'Escuela',birthday:'Cumpleaños',tournament:'Torneo'};
 const money = n => new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0}).format(n);
@@ -128,10 +147,11 @@ function render(){
     for(const court of [1,2]){
       const booked = bookings.find(b=>b.court===court && b.hour<=hour && b.hour+b.hours>hour);
       const button = document.createElement('button');
-      button.className = 'slot '+(booked?.type || '');
-      button.textContent = booked ? booked.client : '+ Disponible';
+      button.className = 'slot '+(!customer && booked ? booked.type : '');
+      button.disabled = customer && Boolean(booked);
+      button.textContent = booked ? (customer ? 'Ocupado' : booked.client) : '+ Disponible';
       button.setAttribute('aria-label', 'Cancha '+court+', '+time(hour)+', '+button.textContent);
-      if(booked){
+      if(booked && !customer){
         const note = document.createElement('small');
         note.textContent = labels[booked.type]+(weekly(booked)?' · ↻ Fijo':'');
         button.append(note);
@@ -147,7 +167,7 @@ $('next').onclick=()=>changeDay(move(day.value,1));
 $('today').onclick=()=>changeDay(localDay());
 day.onchange=()=>changeDay(day.value || localDay());
 function availableHours(state, selection){
-  if(!selection.date || !Number.isInteger(selection.hours) || selection.hours<1) return [];
+  if(!selection.date || (customer && selection.date < localDay()) || !Number.isInteger(selection.hours) || selection.hours<1) return [];
   if(selection.type==='school' && [0,6].includes(weekday(selection.date))) return [];
   return hours.filter(hour=>hour+selection.hours<=23 && !state.bookings.some(other=>clash({...selection,hour},other)));
 }
@@ -163,11 +183,16 @@ function refreshBooking(preferred=fields.hour.value){
   $('saveBooking').disabled=empty;
   const schoolWeekend=selection.type==='school' && [0,6].includes(weekday(selection.date));
   $('availability').textContent=schoolWeekend?'Las escuelas pueden reservar de lunes a viernes.':empty?'No hay horarios para esta combinación. Cambiá la fecha, la cancha o la duración.':'';
-  $('quote').textContent=empty?'':'Importe estimado · '+money(state.rates[selection.type]*selection.hours);
+  const total = state.rates[selection.type] * selection.hours;
+  const deposit = depositFor(total);
+  $('quote').textContent = empty ? '' : customer
+    ? 'Total '+money(total)+' · Seña del '+depositPercent+'% '+money(deposit)+' · Saldo '+money(total-deposit)
+    : 'Importe estimado · '+money(total);
 }
 function newBooking(court=1,hour=9){
   form.reset();
-  fields.date.value=day.value;
+  fields.date.value=customer && day.value<localDay()?localDay():day.value;
+  if(customer) fields.date.min=localDay();
   fields.court.value=court;
   $('error').textContent='';
   refreshBooking(hour);
@@ -178,7 +203,9 @@ form.oninput=()=>{ $('error').textContent=''; refreshBooking(); };
 form.onsubmit=event=>{
   event.preventDefault();
   const state=read();
-  const {client,type,date,court,hour,hours,repeat}=Object.fromEntries(new FormData(form));
+  const {client,date,court,hour,hours}=Object.fromEntries(new FormData(form));
+  const type=customer?'regular':fields.type.value;
+  const repeat=customer?'once':fields.repeat.value;
   const b={id:crypto.randomUUID(),client:client.trim(),type,date,court:Number(court),hour:Number(hour),hours:Number(hours),repeat,price:state.rates[type]*Number(hours)};
   if(!b.client) return $('error').textContent='Ingresá el nombre del cliente o grupo.';
   if(b.hour+b.hours>23) return $('error').textContent='La reserva debe terminar a las 23:00 o antes.';
@@ -187,14 +214,21 @@ form.onsubmit=event=>{
     refreshBooking();
     return $('error').textContent='Ese horario ya no está disponible. Revisá las opciones actualizadas.';
   }
+  if(customer) b.demoDeposit=depositFor(b.price);
   state.bookings.push(b);
   save(state);
   $('booking').close();
   changeDay(b.date);
+  if(customer){
+    const confirmation=$('confirmation');
+    confirmation.textContent='Reserva confirmada · Cancha '+b.court+' · '+b.date+' a las '+time(b.hour)+' · Seña simulada '+money(b.demoDeposit);
+    confirmation.hidden=false;
+    confirmation.scrollIntoView({block:'nearest'});
+  }
 };
 function showDetail(b){
   $('detailTitle').textContent=b.client;
-  $('detailText').textContent=labels[b.type]+' · Cancha '+b.court+' · '+time(b.hour)+' a '+time(b.hour+b.hours)+' · '+money(b.price)+(weekly(b)?' · Fijo semanal desde '+b.date:'');
+  $('detailText').textContent=labels[b.type]+' · Cancha '+b.court+' · '+time(b.hour)+' a '+time(b.hour+b.hours)+' · '+money(b.price)+(b.demoDeposit!=null?' · Seña simulada '+money(b.demoDeposit)+' · Saldo '+money(b.price-b.demoDeposit):'')+(weekly(b)?' · Fijo semanal desde '+b.date:'');
   $('remove').textContent=weekly(b)?'Cancelar serie completa':'Cancelar reserva';
   $('remove').onclick=()=>{
     const state=read();
