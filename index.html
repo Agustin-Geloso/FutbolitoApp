@@ -113,6 +113,10 @@ function read(){
     return saved ? {...saved, rates:{...initial.rates, ...saved.rates}} : initial;
   } catch { return initial; }
 }
+function hourlyRate(state,type,court){
+  if(type === 'regular') return state.rates['court'+court] ?? state.rates.regular;
+  return state.rates[type];
+}
 function save(state){ localStorage.setItem(key,JSON.stringify(state)); }
 const weekly = booking => booking.repeat === 'weekly';
 const occurs = (booking, day) => booking.date === day || weekly(booking) && booking.date <= day && weekday(booking.date) === weekday(day);
@@ -183,7 +187,7 @@ function refreshBooking(preferred=fields.hour.value){
   $('saveBooking').disabled=empty;
   const schoolWeekend=selection.type==='school' && [0,6].includes(weekday(selection.date));
   $('availability').textContent=schoolWeekend?'Las escuelas pueden reservar de lunes a viernes.':empty?'No hay horarios para esta combinación. Cambiá la fecha, la cancha o la duración.':'';
-  const total = state.rates[selection.type] * selection.hours;
+  const total = hourlyRate(state,selection.type,selection.court) * selection.hours;
   const deposit = depositFor(total);
   $('quote').textContent = empty ? '' : customer
     ? 'Total '+money(total)+' · Seña del '+depositPercent+'% '+money(deposit)+' · Saldo '+money(total-deposit)
@@ -217,7 +221,7 @@ form.onsubmit=async event=>{
   const {client,date,court,hour,hours}=Object.fromEntries(new FormData(form));
   const type=customer?'regular':fields.type.value;
   const repeat=customer?'once':fields.repeat.value;
-  const b={id:crypto.randomUUID(),client:client.trim(),type,date,court:Number(court),hour:Number(hour),hours:Number(hours),repeat,price:state.rates[type]*Number(hours)};
+  const b={id:crypto.randomUUID(),client:client.trim(),type,date,court:Number(court),hour:Number(hour),hours:Number(hours),repeat,price:hourlyRate(state,type,court)*Number(hours)};
   if(!b.client) return $('error').textContent='Ingresá el nombre del cliente o grupo.';
   if(b.hour+b.hours>23) return $('error').textContent='La reserva debe terminar a las 23:00 o antes.';
   if(b.type==='school' && [0,6].includes(weekday(b.date))) return $('error').textContent='Las escuelas pueden reservar de lunes a viernes.';
@@ -233,7 +237,7 @@ form.onsubmit=async event=>{
   if(!accepted) return;
 
   const latest = read();
-  if(!availableHours(latest,b).includes(b.hour) || latest.rates[b.type]*b.hours !== b.price){
+  if(!availableHours(latest,b).includes(b.hour) || hourlyRate(latest,b.type,b.court)*b.hours !== b.price){
     refreshBooking();
     await reservationNotice('Revisá la disponibilidad', 'El horario o la tarifa cambió. Volvé al formulario para revisar las opciones.');
     return;
