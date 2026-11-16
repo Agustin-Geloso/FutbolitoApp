@@ -59,7 +59,7 @@ body{font-family:"DM Sans",system-ui,sans-serif}
 .customer :is(.customer-link,.metrics,.legend,#prices,.booking-fields label:has([name=type]),.booking-fields label:has([name=repeat])){display:none}
 .customer .slot:disabled{cursor:default;background:transparent;color:var(--soft)}
 #confirmation{padding:12px;border-radius:10px;border:1px solid var(--line);font-weight:700}
-</style><header><div class="brand"><img class="brand-logo" src="./logo-ptf.jpeg" alt="" width="48" height="48"><div><strong>Para Todos Futbol</strong><small>Complejo deportivo</small></div></div><div class="header-actions"><a class="customer-link" href="?vista=cliente">Vista de clientes</a><button id="theme" type="button" aria-pressed="false">Modo oscuro</button><span class="demo"><i></i> Modo demo</span></div></header><main><section class="hero"><img class="hero-photo" src="./cancha.jpg" alt="Cancha de fútbol con césped sintético y un arco en primer plano" width="750" height="401" fetchpriority="high"><div class="hero-copy"><div class="tag">GESTIÓN DEL COMPLEJO</div><h1>Agenda de canchas</h1><p>Fútbol 6 · Dos canchas · 09:00 a 23:00</p><button class="primary" id="new">+ Nueva reserva</button></div></section><section class="metrics" aria-label="Resumen del día"><div><span>Reservas</span><strong id="count">0</strong></div><div><span>Horas disponibles</span><strong id="available">28</strong></div><div><span>Turnos fijos</span><strong id="fixed">0</strong></div></section><section class="panel"><p id="confirmation" role="status" hidden></p><div class="toolbar"><div><h2>Disponibilidad de canchas</h2><p id="selectedDay" class="selected-day"></p></div><div class="actions"><button id="prev" aria-label="Día anterior">‹</button><input id="day" type="date" aria-label="Fecha de la agenda"><button id="next" aria-label="Día siguiente">›</button><button id="today">Hoy</button><button id="prices">Tarifas</button></div></div><div class="legend"><span class="regular">Fútbol</span> <span class="school">Escuela</span> <span class="birthday">Cumpleaños</span> <span class="tournament">Torneo</span> · ↻ Turno fijo</div><div id="grid" class="grid"></div></section><footer class="muted">Valores de muestra en pesos argentinos. Los cambios se guardan en este navegador.</footer></main>
+</style><header><div class="brand"><img class="brand-logo" src="./logo-ptf.jpeg" alt="" width="48" height="48"><div><strong>Para Todos Futbol</strong><small>Complejo deportivo</small></div></div><div class="header-actions"><a class="customer-link" href="?vista=cliente">Vista de clientes</a><button id="theme" type="button" aria-pressed="false">Modo oscuro</button><span class="demo"><i></i> Modo demo</span></div></header><main><section class="hero"><img class="hero-photo" src="./cancha.jpg" alt="Cancha de fútbol con césped sintético y un arco en primer plano" width="750" height="401" fetchpriority="high"><div class="hero-copy"><div class="tag">GESTIÓN DEL COMPLEJO</div><h1>Agenda de canchas</h1><p>Fútbol 6 · Dos canchas · 09:00 a 23:00</p><button class="primary" id="new">+ Nueva reserva</button></div></section><section class="metrics" aria-label="Resumen del día"><div><span>Reservas</span><strong id="count">0</strong></div><div><span>Horas disponibles</span><strong id="available">28</strong></div><div><span>Turnos fijos</span><strong id="fixed">0</strong></div></section><section class="panel"><p id="agendaStatus" role="status">Cargando disponibilidad…</p><p id="confirmation" role="status" hidden></p><div class="toolbar"><div><h2>Disponibilidad de canchas</h2><p id="selectedDay" class="selected-day"></p></div><div class="actions"><button id="prev" aria-label="Día anterior">‹</button><input id="day" type="date" aria-label="Fecha de la agenda"><button id="next" aria-label="Día siguiente">›</button><button id="today">Hoy</button><button id="prices">Tarifas</button></div></div><div class="legend"><span class="regular">Fútbol</span> <span class="school">Escuela</span> <span class="birthday">Cumpleaños</span> <span class="tournament">Torneo</span> · ↻ Turno fijo</div><div id="grid" class="grid"></div></section><footer class="muted">Valores de muestra en pesos argentinos. La agenda se comparte entre dispositivos.</footer></main>
 <dialog id="booking"><form id="reserve"><div class="booking-heading"><div><div class="eyebrow">AGENDA · FÚTBOL 6</div><h2>Nueva reserva</h2><p>Elegí la cancha y un horario disponible.</p></div><button type="button" data-close aria-label="Cerrar">×</button></div><div class="booking-fields"><label class="wide">Cliente o grupo<input name="client" maxlength="70" required></label><label>Actividad<select name="type"><option value="regular">Fútbol</option><option value="school">Escuela</option><option value="birthday">Cumpleaños</option><option value="tournament">Torneo</option></select></label><label>Fecha<input name="date" type="date" required></label><label>Cancha<select name="court"><option value="1">Cancha 1</option><option value="2">Cancha 2</option></select></label><label>Hora de inicio<select name="hour"></select></label><label>Duración en horas<input type="number" name="hours" min="1" max="14" value="1" required></label><label class="wide">Frecuencia<select name="repeat"><option value="once">Una vez</option><option value="weekly">Fijo semanal</option></select></label></div><p id="availability" role="status"></p><p id="quote"></p><p class="customer-only muted">Pago simulado para la demo. No se realiza ningún cobro.</p><p id="error" class="error" role="alert"></p><div class="actions"><button type="button" data-close>Volver</button><button class="primary" id="saveBooking">Guardar reserva</button></div></form></dialog>
 <dialog id="reservationNotice" aria-labelledby="noticeTitle"><form method="dialog"><h2 id="noticeTitle"></h2><p id="noticeMessage"></p><div class="actions"><button id="noticeBack" value="back">Volver</button><button id="noticeAccept" class="primary" value="accept">Aceptar</button></div></form></dialog><dialog id="detail"><h2 id="detailTitle"></h2><p id="detailText"></p><div class="actions"><button data-close>Volver</button><button id="remove">Cancelar reserva</button></div></dialog>
 <dialog id="rates"><form id="rateForm"><h2>Tarifas por hora</h2><p class="muted">Las nuevas reservas usan estas tarifas. Las existentes conservan su importe.</p><label>Fútbol (ARS)<input name="regular" type="number" min="1" max="100000000" required></label><label>Escuela (ARS)<input name="school" type="number" min="1" max="100000000" required></label><label>Cumpleaños (ARS)<input name="birthday" type="number" min="1" max="100000000" required></label><label>Torneo (ARS)<input name="tournament" type="number" min="1" max="100000000" required></label><div class="actions"><button type="button" data-close>Volver</button><button class="primary">Guardar tarifas</button></div></form></dialog>
@@ -83,7 +83,7 @@ if(customer){
   document.querySelector('h1').textContent = 'Reservá tu cancha';
   $('new').textContent = 'Elegir horario';
   $('saveBooking').textContent = 'Simular pago y reservar';
-  document.querySelector('footer').textContent = 'Demo de reservas. Los datos se guardan en este navegador.';
+  document.querySelector('footer').textContent = 'Demo de reservas. La seña es simulada.';
 }
 const key = 'futbolito-complejo-demo-v1';
 const labels = {regular:'Fútbol',school:'Escuela',birthday:'Cumpleaños',tournament:'Torneo'};
@@ -99,25 +99,31 @@ const time = h => String(h).padStart(2,'0')+':00';
 const hours = Array.from({length:14},(_,i)=>i+9);
 const today = localDay();
 const schoolDay = [0,6].includes(weekday(today)) ? move(today,(8-weekday(today))%7) : today;
-const initial = {
-  rates:{regular:32000,school:24000,birthday:55000,tournament:65000},
-  bookings:[
-    {id:'example-1',client:'Equipo La Banda',type:'regular',date:today,court:1,hour:19,hours:1,repeat:'weekly',price:32000},
-    {id:'example-2',client:'Escuela Horizonte',type:'school',date:schoolDay,court:2,hour:10,hours:2,repeat:'weekly',price:48000},
-    {id:'example-3',client:'Cumple de Mía',type:'birthday',date:today,court:2,hour:16,hours:2,repeat:'once',price:110000}
-  ]
-};
-function read(){
-  try {
-    const saved = JSON.parse(localStorage.getItem(key));
-    return saved ? {...saved, rates:{...initial.rates, ...saved.rates}} : initial;
-  } catch { return initial; }
-}
+let sharedState={rates:{},bookings:[]};
+const endpoint='/api/agenda'+(customer?'':'?staff=1');
+function read(){return sharedState;}
 function hourlyRate(state,type,court){
-  if(type === 'regular') return state.rates['court'+court] ?? state.rates.regular;
-  return state.rates[type];
+  return state.rates[type==='regular'?'court'+court:type];
 }
-function save(state){ localStorage.setItem(key,JSON.stringify(state)); }
+async function agenda(payload){
+  const response=await fetch(endpoint,payload?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}:{});
+  if(!response.ok){
+    const body=await response.json().catch(()=>({}));
+    throw Error(body.error||'No se pudo acceder a la agenda.');
+  }
+  if(!payload) sharedState=await response.json();
+}
+async function reloadAgenda(){
+  try {
+    await agenda();
+    $('agendaStatus').textContent='';
+    $('new').disabled=false;
+    $('prices').disabled=false;
+    render();
+  } catch(error){
+    $('agendaStatus').textContent=error.message;
+  }
+}
 const weekly = booking => booking.repeat === 'weekly';
 const occurs = (booking, day) => booking.date === day || weekly(booking) && booking.date <= day && weekday(booking.date) === weekday(day);
 const clash = (a,b) => {
@@ -242,13 +248,15 @@ form.onsubmit=async event=>{
     await reservationNotice('Revisá la disponibilidad', 'El horario o la tarifa cambió. Volvé al formulario para revisar las opciones.');
     return;
   }
-  latest.bookings.push(b);
-  try { save(latest); } catch {
-    await reservationNotice('No se pudo guardar', 'Volvé al formulario e intentá nuevamente.');
+  try { await agenda({action:'book',booking:b}); } catch(error) {
+    await reloadAgenda();
+    refreshBooking();
+    await reservationNotice('No se pudo guardar',error.message);
     return;
   }
   $('booking').close();
-  changeDay(b.date);
+  day.value=b.date;
+  await reloadAgenda();
   if(customer){
     const confirmation=$('confirmation');
     confirmation.textContent='Reserva confirmada · Cancha '+b.court+' · '+b.date+' a las '+time(b.hour)+' · Seña simulada '+money(b.demoDeposit);
@@ -261,12 +269,11 @@ function showDetail(b){
   $('detailTitle').textContent=b.client;
   $('detailText').textContent=labels[b.type]+' · Cancha '+b.court+' · '+time(b.hour)+' a '+time(b.hour+b.hours)+' · '+money(b.price)+(b.demoDeposit!=null?' · Seña simulada '+money(b.demoDeposit)+' · Saldo '+money(b.price-b.demoDeposit):'')+(weekly(b)?' · Fijo semanal desde '+b.date:'');
   $('remove').textContent=weekly(b)?'Cancelar serie completa':'Cancelar reserva';
-  $('remove').onclick=()=>{
-    const state=read();
-    state.bookings=state.bookings.filter(other=>other.id!==b.id);
-    save(state);
+  $('remove').onclick=async()=>{
+    try { await agenda({action:'remove',id:b.id}); }
+    catch(error){await reservationNotice('No se pudo cancelar',error.message);return;}
     $('detail').close();
-    render();
+    await reloadAgenda();
   };
   $('detail').showModal();
 }
@@ -275,14 +282,17 @@ $('prices').onclick=()=>{
   for(const type of Object.keys(labels)) $('rateForm').elements[type].value=rates[type];
   $('rates').showModal();
 };
-$('rateForm').onsubmit=event=>{
+$('rateForm').onsubmit=async event=>{
   event.preventDefault();
-  const state=read();
-  for(const [type,value] of new FormData(event.currentTarget)) state.rates[type]=Number(value);
-  save(state);
+  const rates=Object.fromEntries([...new FormData(event.currentTarget)].map(([key,value])=>[key,Number(value)]));
+  try { await agenda({action:'rates',rates}); }
+  catch(error){await reservationNotice('No se pudieron guardar las tarifas',error.message);return;}
   $('rates').close();
+  await reloadAgenda();
 };
 document.querySelectorAll('[data-close]').forEach(button=>button.onclick=()=>button.closest('dialog').close());
-window.addEventListener('storage',event=>{if(event.key===key){ render(); if($('booking').open) refreshBooking(); }});
-render();
+$('new').disabled=true;
+$('prices').disabled=true;
+reloadAgenda();
+window.addEventListener('focus',reloadAgenda);
 </script></html>
